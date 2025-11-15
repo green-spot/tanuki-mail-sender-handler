@@ -3,6 +3,7 @@
 namespace GreenSpot\Tanuki\PostHandler;
 
 use GreenSpot\Tanuki\PostHandlerInterface;
+use GreenSpot\Tanuki\PostHandlerResult;
 use PHPMailer\PHPMailer\PHPMailer;
 
 class MailSenderHandler implements PostHandlerInterface {
@@ -72,7 +73,7 @@ class MailSenderHandler implements PostHandlerInterface {
     }
   }
 
-  public function handle(array $formData): void {
+  public function handle(array $formData): PostHandlerResult {
     // Body
     if(!empty($this->config['body_template'])) {
       $twig = $this->getTwig();
@@ -95,6 +96,7 @@ class MailSenderHandler implements PostHandlerInterface {
     }
       */
 
+    return new PostHandlerResult(true);
   }
 
   private function getTwig(): \Twig\Environment {
