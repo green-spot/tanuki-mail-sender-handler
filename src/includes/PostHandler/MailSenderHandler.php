@@ -2,13 +2,15 @@
 
 namespace GreenSpot\Tanuki\PostHandler;
 
-use GreenSpot\Tanuki\PostHandlerInterface;
-use GreenSpot\Tanuki\PostHandlerResult;
+use GreenSpot\Tanuki\AbstractHandler;
+use GreenSpot\Tanuki\Form;
+use GreenSpot\Tanuki\HandlerPipelineContext;
+use GreenSpot\Tanuki\HandlerResult;
 use PHPMailer\PHPMailer\PHPMailer;
 
-class MailSenderHandler implements PostHandlerInterface {
-  public PHPMailer $mailer;
+class MailSenderHandler extends AbstractHandler {
   public array $config = [];
+  private PHPMailer $mailer;
 
   public function __construct(array $config = []) {
     $this->config = $config;
@@ -72,18 +74,17 @@ class MailSenderHandler implements PostHandlerInterface {
       $this->mailer->addAddress($config['mailer']['to']);
     }
   }
-
-  public function handle(array $formData): PostHandlerResult {
+  public function handle(Form $form, HandlerPipelineContext $context): HandlerResult {
     // Body
     if(!empty($this->config['body_template'])) {
       $twig = $this->getTwig();
       $template = $twig->createTemplate($this->config['body_template']);
-      $this->mailer->Body = $template->render(['data' => $formData]);
+      $this->mailer->Body = $template->render(['data' => $form->postData]);
     }
 
     // To field
     if(!empty($this->config['mailer']['to_field']) && isset($formData[$this->config['mailer']['to_field']])) {
-      $this->mailer->addAddress($formData[$this->config['mailer']['to_field']]);
+      $this->mailer->addAddress($form->postData[$this->config['mailer']['to_field']]);
     }
 
     // Send email
@@ -96,7 +97,7 @@ class MailSenderHandler implements PostHandlerInterface {
     }
       */
 
-    return new PostHandlerResult(true);
+    return $this->success();
   }
 
   private function getTwig(): \Twig\Environment {
