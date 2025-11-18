@@ -75,16 +75,18 @@ class MailSenderHandler extends AbstractHandler {
     }
   }
   public function handle(Form $form, HandlerPipelineContext $context): HandlerResult {
+    $data = $form->getNormalizedData();
+
     // Body
     if(!empty($this->config['body_template'])) {
       $twig = $this->getTwig();
       $template = $twig->createTemplate($this->config['body_template']);
-      $this->mailer->Body = $template->render(['data' => $form->postData]);
+      $this->mailer->Body = $template->render(['data' => $data]);
     }
 
     // To field
     if(!empty($this->config['mailer']['to_field']) && isset($formData[$this->config['mailer']['to_field']])) {
-      $this->mailer->addAddress($form->postData[$this->config['mailer']['to_field']]);
+      $this->mailer->addAddress($data[$this->config['mailer']['to_field']]);
     }
 
     // Send email
